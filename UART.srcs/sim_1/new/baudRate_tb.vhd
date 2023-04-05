@@ -124,7 +124,7 @@ begin
     process
     begin
         wait for 13ns;
-        rx_data <= '0';
+        rx_data <= '0'; --start
         wait for c_uartBaudCnt;
         rx_data <= '1';
         wait for c_uartBaudCnt;
@@ -142,22 +142,14 @@ begin
         wait for c_uartBaudCnt;
         rx_data <= '0';
         wait for c_uartBaudCnt;
-        rx_data <= '1';
+        rx_data <= '1'; --stop
         
         wait for 70ns;
         wait for c_uartBaudCnt;
         rx_en <= '1';
-        rx_data <= '1';
+        --rx_data <= '1';
         wait for c_uartBaudCnt;
-        rx_data <= '0';
-        wait for c_uartBaudCnt;
-        rx_data <= '1';
-        wait for c_uartBaudCnt;
-        rx_data <= '1';
-        wait for c_uartBaudCnt;
-        rx_data <= '0';
-        wait for c_uartBaudCnt;
-        rx_data <= '1';
+        rx_data <= '0'; --start
         wait for c_uartBaudCnt;
         rx_data <= '1';
         wait for c_uartBaudCnt;
@@ -165,9 +157,60 @@ begin
         wait for c_uartBaudCnt;
         rx_data <= '0';
         wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '1'; --stop
+        
+        wait for c_uartBaudCnt;
+        rx_data <= '0'; -- start
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
         rx_data <= '0';
         wait for c_uartBaudCnt;
         rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '1'; --stop
+
+        wait for c_uartBaudCnt;
+        rx_data <= '0'; -- start
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '1'; --stop
+
         wait for 30200ns;
         rx_en <= '0';
         wait;
