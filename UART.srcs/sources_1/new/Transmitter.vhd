@@ -59,8 +59,6 @@ architecture Behavioral of Transmitter is
     signal r_Tx         :   std_logic   :=  '1';    -- 作为 o_Tx的缓冲
     signal r_TxIdleFlag :   std_logic   :=  '0';    -- 作为 o_TxIdleFlag的缓冲 1空闲
     
-    signal r_Continue   :   std_logic   :=  '0';
-    
 begin
 -- 组合逻辑
     c_BpsCnt <= i_BpsCnt - 1;
@@ -78,13 +76,11 @@ begin
             r_BpsCnt      <=  0 ;
             r_Tx          <= '1';
             r_TxIdleFlag  <= '0';
-            r_Continue    <= '0';
         elsif (rising_edge(i_SysClk)) then
             case s_TxFsm is
                 when s_Idle  =>     -- ** 空闲状态
                     -- OFL
                     r_TxIdleFlag <= '1';
-                    r_Continue   <= '0';
                     if (i_TxFlag = '1') then
                         r_BitArray_10(8 downto 1) <= i_DataByte;
                         r_Tx <= r_BitArray_10(r_BitCnt);
@@ -102,56 +98,30 @@ begin
                     end if;
                 when s_Data =>     -- ** 发送数据位
                     -- OFL
-                    r_Continue <= '0';
                     if (r_BpsCnt = c_BpsCnt) then
                         r_BpsCnt <= 0;
                         if (r_BitCnt = 10) then
-                            --r_BitCnt <= 0;
-                            if (i_TxFlag = '1' or r_Continue = '1') then
-                                r_Continue <= '0';
-                                r_BitArray_10(8 downto 1) <= i_DataByte;
-                                r_Tx <= r_BitArray_10(0);
-                                r_BitCnt <= 1;
-                            end if;
+                            r_BitCnt <= 0;
+                            --r_TxIdleFlag <= '1';
+                            r_BitArray_10 <= "1000000000";
                         else
                             r_BitCnt <= r_BitCnt + 1;
                             r_Tx <= r_BitArray_10(r_BitCnt);
                         end if;
                     else
                         r_BpsCnt <= r_BpsCnt + 1;
-                        if (r_BitCnt = 10 and i_TxFlag = '1') then
-                            r_BitArray_10(8 downto 1) <= i_DataByte;
-                            r_Continue <= '1';
+                        if (r_BitCnt = 10 and r_BpsCnt = c_BpsCnt-1) then
+                            r_TxIdleFlag <= '1';
                         end if;
                     end if;
                     
                     -- 状态维持和转移
                     if (r_BpsCnt = c_BpsCnt and r_BitCnt = 10) then
                         -- NSL
-                        if (r_Continue = '1' or i_TxFlag = '1') then
-                            s_TxFsm <=s_Data;
-                        else
-                            s_TxFsm <= s_End;
-                        end if;
-                    else
-                        -- SM
-                        s_TxFsm <= s_Data;
-                    end if;
-                when s_End   =>     -- ** 发送结束
-                    -- OFL
-                    if (r_BitCnt = 10) then
-                        r_BitCnt <= 0;
-                        r_TxIdleFlag <= '1';
-                        r_BitArray_10 <= "1000000000";
-                    end if;
-                    
-                    -- 状态维持和转移
-                    if( r_BitCnt = 10) then
-                        -- NSL
                         s_TxFsm <= s_Idle;
                     else
                         -- SM
-                        s_TxFsm <= s_End;
+                        s_TxFsm <= s_Data;
                     end if;
                 when others  =>
                     s_TxFsm <= s_Idle;

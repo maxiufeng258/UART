@@ -95,6 +95,9 @@ architecture Behavioral of baudRate_tb is
     signal rxdata: std_logic_vector(7 downto 0);
     signal rxflag : std_logic;
     
+    signal txdata : std_logic_vector(7 downto 0) := "00000000";
+    signal txflag : std_logic;
+    
     signal c_uartBaudCnt : time := 20* 434ns;
     
     signal rx_en : std_logic:='1';
@@ -103,6 +106,9 @@ architecture Behavioral of baudRate_tb is
     signal r_txFlag:std_logic ;
     signal o_txIdleFlag : std_logic;
     signal r_DataByte: std_logic_vector(7 downto 0) := x"00";
+    
+    type t_Fsm is (s1,s2,s3);
+    signal s_Fsm : t_Fsm := s1;
 begin
 
     clk_proc :process
@@ -211,9 +217,79 @@ begin
         wait for c_uartBaudCnt;
         rx_data <= '1'; --stop
 
+        
+        wait for 10us;
+        wait for c_uartBaudCnt;
+        rx_data <= '0'; -- start
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '1'; --stop
+        
+        wait for c_uartBaudCnt;
+        rx_data <= '0'; -- start
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '0';
+        wait for c_uartBaudCnt;
+        rx_data <= '1';
+        wait for c_uartBaudCnt;
+        rx_data <= '1'; --stop
+        
         wait for 30200ns;
         rx_en <= '0';
         wait;
+    end process;
+    
+    process(clk)
+    begin
+        if (rising_edge(clk)) then
+            case s_Fsm is
+                when s1 =>
+                txflag <= '0';
+                    if (rxflag = '1') then
+                        s_Fsm <= s2;
+                    else
+                        s_Fsm <= s1;
+                    end if;
+                when s2 =>
+                    if (o_TxIdleFlag='1') then
+                        txflag <= '1';
+                        txdata <= rxdata;
+                        s_Fsm <= s1;
+                    else
+                        txflag <= '0';
+                        s_Fsm <= s2;
+                    end if;
+                when others =>
+                    s_Fsm <= s1;
+            end case;
+        end if;
     end process;
 
 --    process
@@ -273,8 +349,8 @@ begin
             o_RxDataByte=>rxdata,
             o_RxDataFlag=>rxflag,
             -- Tx 相关
-            i_TxDataByte=> rxdata,
-            i_TxFlag    => rxflag,
+            i_TxDataByte=> txdata,
+            i_TxFlag    => txflag,
             i_TxWorkEN  =>  '1',  -- Transmitter功能启用和禁用控制
             o_Tx        => o_txPin,
             o_TxIdleFlag=> o_TxIdleFlag
